@@ -566,14 +566,25 @@ async function deleteDataset(id) {
   }
 }
 
-function initTabs() {
-  const tabBtns = document.querySelectorAll('.tab-btn');
+function initFittingTabs() {
+  const tabBtns = document.querySelectorAll('#module-fitting .tab-btn');
   tabBtns.forEach(btn => {
     btn.addEventListener('click', () => {
       const tab = btn.dataset.tab;
       tabBtns.forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
       document.getElementById('tab-history').style.display = tab === 'history' ? 'block' : 'none';
       document.getElementById('tab-datasets').style.display = tab === 'datasets' ? 'block' : 'none';
+    });
+  });
+}
+
+function initRecoveryTabs() {
+  const tabBtns = document.querySelectorAll('#module-recovery .tab-btn');
+  tabBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const tab = btn.dataset.tab;
+      tabBtns.forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
+      document.getElementById('tab-recoveryHistory').style.display = tab === 'recoveryHistory' ? 'block' : 'none';
     });
   });
 }
@@ -595,7 +606,7 @@ function initEventListeners() {
 
 function init() {
   initCharts();
-  initTabs();
+  initFittingTabs();
   initEventListeners();
   clearDataTable();
   loadHistory();
@@ -615,6 +626,9 @@ function initModuleTabs() {
       document.getElementById('module-recovery').style.display = module === 'recovery' ? 'block' : 'none';
       if (module === 'recovery') {
         loadRecoveryHistory();
+      } else if (module === 'fitting') {
+        loadHistory();
+        loadDatasets();
       }
     });
   });
@@ -985,7 +999,8 @@ function initRecoveryModule() {
 
 function initAll() {
   initCharts();
-  initTabs();
+  initFittingTabs();
+  initRecoveryTabs();
   initEventListeners();
   initModuleTabs();
   initRecoveryModule();
