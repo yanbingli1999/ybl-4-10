@@ -10,6 +10,7 @@ const PORT = process.env.PORT || 3000;
 const DATA_DIR = path.join(__dirname, 'data');
 const DATASETS_FILE = path.join(DATA_DIR, 'datasets.json');
 const HISTORY_FILE = path.join(DATA_DIR, 'history.json');
+const RECOVERY_FILE = path.join(DATA_DIR, 'recovery.json');
 
 app.use(cors());
 app.use(express.json({ limit: '10mb' }));
@@ -24,6 +25,9 @@ function ensureDataFiles() {
   }
   if (!fs.existsSync(HISTORY_FILE)) {
     fs.writeFileSync(HISTORY_FILE, JSON.stringify([], null, 2));
+  }
+  if (!fs.existsSync(RECOVERY_FILE)) {
+    fs.writeFileSync(RECOVERY_FILE, JSON.stringify([], null, 2));
   }
 }
 ensureDataFiles();
@@ -317,6 +321,199 @@ app.delete('/api/history/:id', (req, res) => {
     return res.status(404).json({ error: '记录不存在' });
   }
   writeJsonFile(HISTORY_FILE, history);
+  res.json({ success: true });
+});
+
+function calculateConcentrationFromResponse(response, modelType, params) {
+  switch (modelType) {
+    case 'linear': {
+      const a = params.a;
+      const b = params.b;
+      if (Math.abs(a) < 1e-12) return 0;
+      return (response - b) / a;
+    }
+    case 'exponential': {
+      const a = params.a;
+      const b = params.b;
+      if (a <= 0 || response <= 0 || Math.abs(b) < 1e-12) return 0;
+      return Math.log(response / a) / b;
+    }
+    case 'quadratic': {
+      const a = params.a;
+      const b = params.b;
+      const c = params.c;
+      const discriminant = b * b - 4 * a * (c - response);
+      if (discriminant < 0) return 0;
+      const sqrtDiscriminant = Math.sqrt(discriminant);
+      const x1 = (-b + sqrtDiscriminant) / (2 * a);
+      const x2 = (-b - sqrtDiscriminant) / (2 * a);
+      return Math.max(x1, x2);
+    }
+    default:
+      return 0;
+  }
+}
+
+function calculateRecoveryMetrics(points, recoveryMin, recoveryMax) {
+  const recoveries = points.map(p => p.recovery);
+  const n = recoveries.length;
+
+  const sum = recoveries.reduce((a, b) => a + b, 0);
+  const averageRecovery = sum / n;
+
+  const minRecovery = Math.min(...recoveries);
+  const maxRecovery = Math.max(...recoveries);
+
+  const variance = recoveries.reduce((acc, val) => acc + Math.pow(val - averageRecovery, 2), 0) / (n - 1);
+  const stdDev = Math.sqrt(variance);
+  const rsd = (stdDev / Math.abs(averageRecovery)) * 100;
+
+  let passCount = 0, lowCount = 0, highCount = 0;
+  recoveries.forEach(r => {
+    if (r >= recoveryMin && r <= recoveryMax) {
+      passCount++;
+    } else if (r < recoveryMin) {
+      lowCount++;
+    } else {
+      highCount++;
+    }
+  });
+
+  const passRate = (passCount / n) * 100;
+  const batchPass = passRate >= 80;
+
+  return {
+    totalCount: n,
+    passCount,
+    lowCount,
+    highCount,
+    passRate,
+    averageRecovery,
+    minRecovery,
+    maxRecovery,
+    rsd,
+    batchPass
+  };
+}
+
+app.post('/api/recovery/calculate', (req, res) => {
+  const { batchName, modelType, recoveryMin, recoveryMax, points } = req.body;
+
+  if (!points || !Array.isArray(points) || points.length < 3) {
+    return res.status(400).json({ error: '至少需要3个有效实验点' });
+  }
+  if (!modelType) {
+    return res.status(400).json({ error: '请选择拟合模型' });
+  }
+
+  const calibrationPoints = points.map(p => ({ x: p.theoretical / p.dilution, y: p.response }));
+
+  let params;
+  let modelEquation;
+
+  try {
+    switch (modelType) {
+      case 'linear':
+        params = linearRegression(calibrationPoints);
+        modelEquation = `y = ${params.a.toFixed(6)}x + ${params.b.toFixed(6)}`;
+        break;
+      case 'exponential':
+        params = exponentialRegression(calibrationPoints);
+        modelEquation = `y = ${params.a.toFixed(6)} · e^(${params.b.toFixed(6)}x)`;
+        break;
+      case 'quadratic':
+        params = quadraticRegression(calibrationPoints);
+        modelEquation = `y = ${params.a.toFixed(6)}x² + ${params.b.toFixed(6)}x + ${params.c.toFixed(6)}`;
+        break;
+      default:
+        return res.status(400).json({ error: '不支持的模型类型' });
+    }
+  } catch (e) {
+    return res.status(400).json({ error: '标准曲线拟合失败: ' + e.message });
+  }
+
+  const calibrationMetrics = calculateMetrics(calibrationPoints, modelType, params);
+
+  const results = points.map(p => {
+    const calculatedConc = calculateConcentrationFromResponse(p.response, modelType, params);
+    const actualConc = calculatedConc * p.dilution;
+    const recovery = (actualConc / p.theoretical) * 100;
+    return {
+      theoretical: p.theoretical,
+      response: p.response,
+      dilution: p.dilution,
+      calculatedConcentration: actualConc,
+      recovery
+    };
+  });
+
+  const summary = calculateRecoveryMetrics(results, recoveryMin, recoveryMax);
+
+  const recoveryRecord = {
+    id: generateId(),
+    batchName: batchName || '未命名批次',
+    modelType,
+    recoveryMin: recoveryMin || 80,
+    recoveryMax: recoveryMax || 120,
+    points,
+    calibration: {
+      params,
+      modelEquation,
+      metrics: {
+        rSquared: calibrationMetrics.rSquared,
+        mse: calibrationMetrics.mse,
+        rmse: calibrationMetrics.rmse,
+        mae: calibrationMetrics.mae
+      }
+    },
+    results,
+    summary,
+    createdAt: new Date().toISOString()
+  };
+
+  const recoveryHistory = readJsonFile(RECOVERY_FILE);
+  recoveryHistory.unshift(recoveryRecord);
+  if (recoveryHistory.length > 50) {
+    recoveryHistory.length = 50;
+  }
+  writeJsonFile(RECOVERY_FILE, recoveryHistory);
+
+  res.json(recoveryRecord);
+});
+
+app.get('/api/recovery/history', (req, res) => {
+  const history = readJsonFile(RECOVERY_FILE);
+  const summaries = history.map(h => ({
+    id: h.id,
+    batchName: h.batchName,
+    modelType: h.modelType,
+    recoveryMin: h.recoveryMin,
+    recoveryMax: h.recoveryMax,
+    summary: h.summary,
+    createdAt: h.createdAt
+  }));
+  res.json(summaries);
+});
+
+app.get('/api/recovery/history/:id', (req, res) => {
+  const { id } = req.params;
+  const history = readJsonFile(RECOVERY_FILE);
+  const result = history.find(h => h.id === id);
+  if (!result) {
+    return res.status(404).json({ error: '记录不存在' });
+  }
+  res.json(result);
+});
+
+app.delete('/api/recovery/history/:id', (req, res) => {
+  const { id } = req.params;
+  let history = readJsonFile(RECOVERY_FILE);
+  const initialLength = history.length;
+  history = history.filter(h => h.id !== id);
+  if (history.length === initialLength) {
+    return res.status(404).json({ error: '记录不存在' });
+  }
+  writeJsonFile(RECOVERY_FILE, history);
   res.json({ success: true });
 });
 

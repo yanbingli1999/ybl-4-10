@@ -42,13 +42,361 @@ body {
   font-size: 14px;
 }
 
+.module-tabs {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin-top: 16px;
+}
+
+.module-tab-btn {
+  padding: 10px 24px;
+  border: 2px solid #e2e8f0;
+  background: white;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: #64748b;
+}
+
+.module-tab-btn:hover {
+  border-color: #667eea;
+  color: #667eea;
+}
+
+.module-tab-btn.active {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  border-color: transparent;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.module-content {
+  width: 100%;
+}
+
 .main-layout {
+  flex: 1;
+  min-height: 0;
+  padding: 20px;
+}
+
+#module-fitting {
   display: grid;
   grid-template-columns: 340px 1fr 320px;
   gap: 20px;
-  padding: 20px;
-  flex: 1;
   min-height: 0;
+}
+
+.recovery-layout {
+  display: grid;
+  grid-template-columns: 380px 1fr;
+  gap: 20px;
+  min-height: 0;
+}
+
+.recovery-left,
+.recovery-right {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  overflow-y: auto;
+  max-height: calc(100vh - 200px);
+}
+
+.recovery-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.control-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.control-row label {
+  min-width: 80px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #475569;
+}
+
+.control-row input[type="text"],
+.control-row input[type="number"],
+.control-row select {
+  flex: 1;
+  padding: 8px 12px;
+  border: 2px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 13px;
+  transition: all 0.2s;
+}
+
+.control-row input:focus,
+.control-row select:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.15);
+}
+
+.range-inputs {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.range-inputs input {
+  width: 80px;
+}
+
+.range-sep {
+  font-size: 13px;
+  color: #64748b;
+}
+
+.recovery-actions {
+  margin-top: 16px;
+}
+
+.calibration-params {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.param-empty {
+  text-align: center;
+  padding: 20px;
+  color: #94a3b8;
+  font-size: 13px;
+}
+
+.param-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 14px;
+  background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+  border-radius: 8px;
+}
+
+.param-label {
+  font-size: 13px;
+  color: #475569;
+}
+
+.param-value {
+  font-size: 14px;
+  font-weight: 700;
+  color: #1e293b;
+  font-family: 'Cambria Math', 'Consolas', monospace;
+}
+
+.param-equation {
+  padding: 14px;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  border-radius: 10px;
+  color: white;
+  margin-top: 6px;
+}
+
+.recovery-result-wrapper {
+  max-height: 320px;
+}
+
+.recovery-result-table th {
+  font-size: 12px;
+  text-align: center;
+}
+
+.recovery-result-table td {
+  text-align: center;
+  font-size: 12px;
+}
+
+.judgment-tag {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.judgment-tag.pass {
+  background: linear-gradient(135deg, #d1fae5, #a7f3d0);
+  color: #065f46;
+  border: 1px solid #10b981;
+}
+
+.judgment-tag.low {
+  background: linear-gradient(135deg, #dbeafe, #bfdbfe);
+  color: #1e40af;
+  border: 1px solid #3b82f6;
+}
+
+.judgment-tag.high {
+  background: linear-gradient(135deg, #fee2e2, #fecaca);
+  color: #991b1b;
+  border: 1px solid #ef4444;
+}
+
+.recovery-summary {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+
+.summary-card {
+  padding: 14px;
+  background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+  border-radius: 10px;
+  text-align: center;
+}
+
+.summary-card.full-width {
+  grid-column: span 2;
+}
+
+.summary-label {
+  font-size: 12px;
+  color: #64748b;
+  margin-bottom: 6px;
+}
+
+.summary-value {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1e293b;
+  font-family: 'Cambria Math', 'Consolas', monospace;
+}
+
+.summary-value.pass {
+  color: #059669;
+}
+
+.summary-value.low {
+  color: #2563eb;
+}
+
+.summary-value.high {
+  color: #dc2626;
+}
+
+.recovery-history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.recovery-history-item {
+  padding: 14px;
+  border: 2px solid #e2e8f0;
+  border-radius: 10px;
+  transition: all 0.2s;
+  cursor: pointer;
+}
+
+.recovery-history-item:hover {
+  border-color: #667eea;
+  background: #f8fafc;
+  transform: translateX(2px);
+}
+
+.recovery-history-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #1e293b;
+  margin-bottom: 4px;
+}
+
+.recovery-history-stats {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 6px;
+  flex-wrap: wrap;
+}
+
+.recovery-history-stat {
+  font-size: 11px;
+  padding: 2px 8px;
+  background: rgba(102, 126, 234, 0.1);
+  color: #667eea;
+  border-radius: 4px;
+  font-weight: 500;
+}
+
+.recovery-history-meta {
+  font-size: 11px;
+  color: #94a3b8;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.recovery-history-actions {
+  display: flex;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.recovery-history-actions button {
+  flex: 1;
+  padding: 6px 8px;
+  font-size: 11px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.recovery-result-table .recovery-highlight {
+  background: #fef3c7;
+}
+
+.data-table th small {
+  font-weight: normal;
+  color: #94a3b8;
+  font-size: 10px;
+}
+
+@media (max-width: 1400px) {
+  #module-fitting {
+    grid-template-columns: 300px 1fr 280px;
+  }
+  .recovery-layout {
+    grid-template-columns: 340px 1fr;
+  }
+}
+
+@media (max-width: 1100px) {
+  #module-fitting {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto auto;
+  }
+  .recovery-layout {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto;
+  }
+  .recovery-left,
+  .recovery-right {
+    max-height: none;
+    overflow-y: visible;
+  }
+  #module-fitting .sidebar,
+  #module-fitting .center-panel {
+    max-height: none;
+    overflow-y: visible;
+  }
 }
 
 .sidebar {

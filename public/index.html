@@ -11,10 +11,15 @@
   <div class="app-container">
     <header class="app-header">
       <h1>📈 实验曲线拟合台</h1>
-      <p class="subtitle">科学计算工具 · 支持线性/指数/二次曲线拟合</p>
+      <p class="subtitle">科学计算工具 · 支持曲线拟合与回收率评估</p>
+      <div class="module-tabs">
+        <button class="module-tab-btn active" data-module="fitting">📊 曲线拟合</button>
+        <button class="module-tab-btn" data-module="recovery">🧪 回收率评估</button>
+      </div>
     </header>
 
     <div class="main-layout">
+      <div class="module-content" id="module-fitting">
       <aside class="sidebar left-panel">
         <div class="panel-section">
           <h2>📋 数据录入</h2>
@@ -151,6 +156,112 @@
           </div>
         </div>
       </aside>
+      </div>
+
+      <div class="module-content" id="module-recovery" style="display:none;">
+        <div class="recovery-layout">
+          <div class="recovery-left">
+            <div class="panel-section">
+              <h2>🧪 样品前处理 - 回收率评估</h2>
+              <div class="recovery-controls">
+                <div class="control-row">
+                  <label>批次名称</label>
+                  <input type="text" id="recoveryBatchName" placeholder="输入批次名称" value="回收率批次-001">
+                </div>
+                <div class="control-row">
+                  <label>拟合模型</label>
+                  <select id="recoveryModelType">
+                    <option value="linear">线性模型 (y = ax + b)</option>
+                    <option value="exponential">指数模型 (y = a·eᵇˣ)</option>
+                    <option value="quadratic">二次曲线 (y = ax² + bx + c)</option>
+                  </select>
+                </div>
+                <div class="control-row">
+                  <label>合格范围</label>
+                  <div class="range-inputs">
+                    <input type="number" id="recoveryMin" value="80" min="0" max="100">
+                    <span class="range-sep">% ~</span>
+                    <input type="number" id="recoveryMax" value="120" min="100" max="200">
+                    <span class="range-sep">%</span>
+                  </div>
+                </div>
+              </div>
+              <div class="table-toolbar">
+                <button id="addRecoveryRowBtn" class="btn btn-primary">➕ 添加实验点</button>
+                <button id="clearRecoveryBtn" class="btn btn-secondary">🗑 清空</button>
+                <button id="loadRecoverySampleBtn" class="btn btn-info">📚 示例数据</button>
+              </div>
+              <div class="data-table-wrapper">
+                <table id="recoveryDataTable" class="data-table">
+                  <thead>
+                    <tr>
+                      <th style="width:50px">#</th>
+                      <th>理论浓度<br/><small>(μg/mL)</small></th>
+                      <th>实测响应<br/><small>(信号值)</small></th>
+                      <th>稀释倍数</th>
+                      <th style="width:60px">操作</th>
+                    </tr>
+                  </thead>
+                  <tbody id="recoveryTableBody">
+                  </tbody>
+                </table>
+              </div>
+              <div class="recovery-actions">
+                <button id="calcRecoveryBtn" class="btn btn-success btn-large">🔬 计算回收率</button>
+              </div>
+            </div>
+
+            <div class="panel-section">
+              <h2>📊 标准曲线参数</h2>
+              <div id="calibrationParams" class="calibration-params">
+                <div class="param-empty">请先执行计算以获取拟合参数</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="recovery-right">
+            <div class="panel-section">
+              <h2>📋 回收率计算结果</h2>
+              <div class="data-table-wrapper recovery-result-wrapper">
+                <table id="recoveryResultTable" class="data-table recovery-result-table">
+                  <thead>
+                    <tr>
+                      <th style="width:50px">#</th>
+                      <th>理论浓度</th>
+                      <th>实测响应</th>
+                      <th>稀释倍数</th>
+                      <th>反算浓度</th>
+                      <th>回收率</th>
+                      <th>判定</th>
+                    </tr>
+                  </thead>
+                  <tbody id="recoveryResultBody">
+                    <tr><td colspan="7" class="empty-state">暂无计算结果</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div class="panel-section">
+              <h2>📈 批次汇总统计</h2>
+              <div id="recoverySummary" class="recovery-summary">
+                <div class="empty-state">暂无统计数据</div>
+              </div>
+            </div>
+
+            <div class="panel-section">
+              <div class="tabs">
+                <button class="tab-btn active" data-tab="recoveryHistory">📜 历史记录</button>
+              </div>
+              <div class="tab-content" id="tab-recoveryHistory">
+                <div id="recoveryHistoryList" class="recovery-history-list">
+                  <div class="empty-state">暂无历史记录</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
 
     <div id="toast" class="toast"></div>

@@ -1,0 +1,147 @@
+[
+  {
+    "id": "mq9qdjhrpuphdi7p3",
+    "batchName": "示例回收率批次-001",
+    "modelType": "linear",
+    "recoveryMin": 80,
+    "recoveryMax": 120,
+    "points": [
+      {
+        "theoretical": 0.5,
+        "response": 1250,
+        "dilution": 1
+      },
+      {
+        "theoretical": 1,
+        "response": 2480,
+        "dilution": 1
+      },
+      {
+        "theoretical": 2,
+        "response": 4950,
+        "dilution": 1
+      },
+      {
+        "theoretical": 5,
+        "response": 12300,
+        "dilution": 1
+      },
+      {
+        "theoretical": 10,
+        "response": 24600,
+        "dilution": 1
+      },
+      {
+        "theoretical": 20,
+        "response": 49200,
+        "dilution": 1
+      },
+      {
+        "theoretical": 1,
+        "response": 228,
+        "dilution": 10
+      },
+      {
+        "theoretical": 1,
+        "response": 258,
+        "dilution": 10
+      },
+      {
+        "theoretical": 1,
+        "response": 263,
+        "dilution": 10
+      }
+    ],
+    "calibration": {
+      "params": {
+        "a": 2459.2889981267685,
+        "b": 12.065208075707131
+      },
+      "modelEquation": "y = 2459.288998x + 12.065208",
+      "metrics": {
+        "rSquared": 0.9999992965252418,
+        "mse": 171.61004627985673,
+        "rmse": 13.100001766406626,
+        "mae": 9.657665764740834
+      }
+    },
+    "results": [
+      {
+        "theoretical": 0.5,
+        "response": 1250,
+        "dilution": 1,
+        "calculatedConcentration": 0.5033710120556076,
+        "recovery": 100.67420241112153
+      },
+      {
+        "theoretical": 1,
+        "response": 2480,
+        "dilution": 1,
+        "calculatedConcentration": 1.0035155664113122,
+        "recovery": 100.35155664113122
+      },
+      {
+        "theoretical": 2,
+        "response": 4950,
+        "dilution": 1,
+        "calculatedConcentration": 2.0078708910117924,
+        "recovery": 100.39354455058962
+      },
+      {
+        "theoretical": 5,
+        "response": 12300,
+        "dilution": 1,
+        "calculatedConcentration": 4.996539569478808,
+        "recovery": 99.93079138957617
+      },
+      {
+        "theoretical": 10,
+        "response": 24600,
+        "dilution": 1,
+        "calculatedConcentration": 9.997985113035854,
+        "recovery": 99.97985113035854
+      },
+      {
+        "theoretical": 20,
+        "response": 49200,
+        "dilution": 1,
+        "calculatedConcentration": 20.000876200149946,
+        "recovery": 100.00438100074973
+      },
+      {
+        "theoretical": 1,
+        "response": 228,
+        "dilution": 10,
+        "calculatedConcentration": 0.8780374819257502,
+        "recovery": 87.80374819257501
+      },
+      {
+        "theoretical": 1,
+        "response": 258,
+        "dilution": 10,
+        "calculatedConcentration": 1.0000239585978734,
+        "recovery": 100.00239585978734
+      },
+      {
+        "theoretical": 1,
+        "response": 263,
+        "dilution": 10,
+        "calculatedConcentration": 1.0203550380432271,
+        "recovery": 102.03550380432272
+      }
+    ],
+    "summary": {
+      "totalCount": 9,
+      "passCount": 9,
+      "lowCount": 0,
+      "highCount": 0,
+      "passRate": 100,
+      "averageRecovery": 99.01955277557911,
+      "minRecovery": 87.80374819257501,
+      "maxRecovery": 102.03550380432272,
+      "rsd": 4.299183377888969,
+      "batchPass": true
+    },
+    "createdAt": "2026-06-11T16:47:28.239Z"
+  }
+]
